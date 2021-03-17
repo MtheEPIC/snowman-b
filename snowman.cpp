@@ -1,3 +1,10 @@
+/**
+	resources:
+	https://docs.microsoft.com/en-us/cpp/cpp/constexpr-cpp?view=msvc-160
+	https://stackoverflow.com/questions/51895603/do-not-use-array-subscript-when-the-index-is-not-an-integer-constant-expression
+	https://en.cppreference.com/w/cpp/error/exception
+**/
+
 #include "snowman.hpp"
 #include <math.h>
 #include <vector>
@@ -70,8 +77,23 @@ namespace ariel {
 		is_left_arm = false;
 		is_right_arm = false;
 		
-		// Check input
-        if (input < 0)
+		check_input(input);
+		
+		// Parse values
+		parse_input(input);
+		
+		// Run snowman
+		add_hat();
+		add_face();
+		add_torso();
+		add_base();
+		
+        return snowman_str;
+    }
+	
+	void check_input(int input)
+	{
+		if (input < 0)
 		{
             throw std::out_of_range("negative input");
 		}
@@ -88,8 +110,10 @@ namespace ariel {
 			}
             input_iter /= TEN;
         }
-		
-		// Parse values
+	}
+	
+	void parse_input(int input)
+	{
 		for (int i = 1; i <= INPUT_LENGTH; i++)
 		{
 			int digit = (input / (int) pow(TEN, INPUT_LENGTH - i));
@@ -105,15 +129,7 @@ namespace ariel {
 		{
 			is_right_arm = true;
 		}
-		
-		// Run snowman
-		add_hat();
-		add_face();
-		add_torso();
-		add_base();
-		
-        return snowman_str;
-    }
+	}
 	
 	void add_hat()
 	{
