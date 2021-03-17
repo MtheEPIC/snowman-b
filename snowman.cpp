@@ -1,5 +1,6 @@
 #include "snowman.hpp"
-#include <array>
+#include <math.h>
+#include <vector>
 
 constexpr int INPUT_LENGTH = 8;
 constexpr int MIN_INPUT = 11111111;
@@ -35,13 +36,13 @@ const char *BASE2 = "(\" \")";
 const char *BASE3 = "(___)";
 const char *BASE4 = "(   )";
 
-std::array<std::string, 4> HATS = { HAT1, HAT2, HAT3, HAT4 };
-std::array<std::string, 4> NOSES = { NOSE1, NOSE2, NOSE3, NOSE4 };
-std::array<std::string, 4> EYES = { EYE1, EYE2, EYE3, EYE4 };
-std::array<std::string, 4> LARMS = { LARM1, LARM2, LARM3, LARM4 };
-std::array<std::string, 4> RARMS = { RARM1, RARM2, RARM3, RARM4 };
-std::array<std::string, 4> TORSOS = { TORSO1, TORSO2, TORSO3, TORSO4 };
-std::array<std::string, 4> BASES = { BASE1, BASE2, BASE3, BASE4 };
+const vector<string> HATS = { HAT1, HAT2, HAT3, HAT4 };
+const vector<string> NOSES = { NOSE1, NOSE2, NOSE3, NOSE4 };
+const vector<string> EYES = { EYE1, EYE2, EYE3, EYE4 };
+const vector<string> LARMS = { LARM1, LARM2, LARM3, LARM4 };
+const vector<string> RARMS = { RARM1, RARM2, RARM3, RARM4 };
+const vector<string> TORSOS = { TORSO1, TORSO2, TORSO3, TORSO4 };
+const vector<string> BASES = { BASE1, BASE2, BASE3, BASE4 };
 
 enum snowman_parts_enum {
         hat, nose, leftEye, rightEye, leftArm, rightArm, torso, base 
@@ -52,6 +53,7 @@ namespace ariel {
     std::string snowman(int input)
     {
         //std::string empty_str = "                                      ";
+		std::vector<int> snowman_parts;
         std::string snowman_str;
         std::string snowman_face;
         std::string snowman_head_line;
@@ -61,7 +63,8 @@ namespace ariel {
 		bool is_left_arm = false;
 		bool is_right_arm = false;
         int right_arm_type = EMPTY_PART_INDEX;
-
+		
+		// Check input
         if (input < 0)
 		{
             throw std::out_of_range("negative input");
@@ -80,46 +83,43 @@ namespace ariel {
             input_iter /= TEN;
         }
 		
-		std::array<int, INPUT_LENGTH> snowman_parts = {};
-		for (int i = 0; i < INPUT_LENGTH; i++)
+		// 
+		for (int i = 1; i <= INPUT_LENGTH; i++)
 		{
-			snowman_parts[INPUT_LENGTH -i -1] = (input%TEN)-1;
-			input /= TEN;
+			int digit = (input / (int) pow(TEN, INPUT_LENGTH - i));
+			digit = (digit % TEN) -1;
+			snowman_parts.push_back(digit);
+			//input /= TEN;
 		}
-		if (snowman_parts[leftArm] != EMPTY_PART_INDEX)
+		if (snowman_parts.at(leftArm) != EMPTY_PART_INDEX)
 		{
 			prefix = " ";
 			is_left_arm = true;
 		}
-		if (snowman_parts[rightArm] != EMPTY_PART_INDEX)
+		if (snowman_parts.at(rightArm) != EMPTY_PART_INDEX)
 		{
 			suffix = " ";
 			is_right_arm = true;
 		}
 		
+		// Run snowman
+		snowman_face = EYES.at(snowman_parts.at(leftEye));
+		snowman_face += NOSES.at(snowman_parts.at(nose));
+		snowman_face += EYES.at(snowman_parts.at(rightEye));
         for (int i = 0; i < INPUT_LENGTH; i++)
         {
-			int chosen_part = snowman_parts[i];
+			int chosen_part = snowman_parts.at(i);
             switch (i)
             {
             case hat:
-                snowman_str += prefix + HATS[chosen_part];
-                break;
-            case nose:
-                snowman_face += NOSES[chosen_part];
-                break;
-            case leftEye:
-                snowman_face = EYES[chosen_part] + snowman_face;
-                break;
-            case rightEye:
-                snowman_face += EYES[chosen_part];
+                snowman_str += prefix + HATS.at(snowman_parts.at(hat));
                 break;
             case leftArm:
 				if (is_left_arm)
 				{
-					snowman_head_line = LARMS[chosen_part][0];
+					snowman_head_line = LARMS.at(chosen_part)[0];
 					snowman_head_line += "(" + snowman_face;
-					snowman_torso_line = LARMS[chosen_part][1];
+					snowman_torso_line = LARMS.at(chosen_part)[1];
 					snowman_torso_line += "(";
 				}
 				else
@@ -132,14 +132,14 @@ namespace ariel {
                 snowman_head_line += ")";
 				if (is_right_arm)
 				{
-					snowman_head_line += RARMS[chosen_part][0];
+					snowman_head_line += RARMS.at(chosen_part)[0];
 				}
                 snowman_head_line += "\n";
                 snowman_str += snowman_head_line;
                 right_arm_type = chosen_part;
                 break;
             case torso:
-                snowman_torso_line += TORSOS[chosen_part];
+                snowman_torso_line += TORSOS.at(chosen_part);
                 snowman_torso_line += ")";
 				if (is_right_arm)
 				{
@@ -148,7 +148,7 @@ namespace ariel {
                 snowman_str += snowman_torso_line + "\n";
                 break;
             case base:
-                snowman_str += prefix + BASES[chosen_part];
+                snowman_str += prefix + BASES.at(chosen_part);
                 break;
             default:
                 break;
